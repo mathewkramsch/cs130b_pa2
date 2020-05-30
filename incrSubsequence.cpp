@@ -5,19 +5,25 @@
 using namespace std;
 
 int main() {
-	// right now just print vectors back
-
-	int n=1; // holds length of each sequence
-	int x;  // holds each integer in sequene
-	vector<int> s;
+	// INITIALIZE VECTOR OF SEQUENCES
+	int n(1), x, count(0);  // n=length of sequence, x=each val in sequence
+	vector<vector<int>*> sqs;  // holds all sequences, vector of vector
 	while (n != 0) {
-		s.clear();
+		sqs.push_back(new vector<int>);
 		cin >> n;
 		for (int i=0; i<n; i++) {
 			cin >> x;
-			s.push_back(x);
+			sqs[count]->push_back(x);
 		}
+		count++;
 	}
+
+	// PRINT BACK SEQUENCES
+	for (int i=0; i<sqs.size(); i++) {
+		for (int j=0; j<sqs[i]->size(); j++) cout << sqs[i]->at(j) << " ";
+		if (i!=sqs.size()-1) cout << endl;
+	}
+
 	return 0;
 }
 
