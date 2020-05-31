@@ -3,14 +3,18 @@
 #include <iostream>
 #include <vector>
 #include <algorithm>
+#include <iterator>
 using namespace std;
 
 void printSequences(vector<vector<int>*> s) {
 // PRECONDITION: s is a vector of vector pointers
 // POSTCONDITION: prints all the sequences that each vector pointer in s points to
+	// cout << "length of s: " << s.size() << endl;
 	for (int i=0; i<s.size(); i++) {
-		for (int j=0; j<s[i]->size(); j++) cout << s[i]->at(j) << " ";
-		if (i!=s.size()-1) cout << endl;
+		cout << s[i]->size() << " ";
+		if (s[i]) { for (int j=0; j<s[i]->size(); j++) cout << s[i]->at(j) << " "; }
+		else cout << "nullptr";
+		cout << endl;
 	}
 }
 
@@ -35,35 +39,42 @@ int main() {
 		count++;
 	}
 
-	// PRINT BACK SEQUENCES
-	// printSequences(seq);
-
-	// vector<vector<int>*> sub;  // holds all longest incr subsequences
+	vector<vector<int>*> sub;  // holds all longest incr subsequences
 	for (int i=0; i<seq.size(); i++) {
-		// vector<int> *s = new vector<int>;
+		vector<int> *s = seq[i];  // call s the vector* at i
+		vector<vector<int>*> pos(s->size());  // holds all possible incr subsequences of s
+		pos[0] = new vector<int>;
+		pos[0]->push_back(s->at(0));  // 1st incr subseq of s = s's 1st element
 
-		// vector length that is n long, initializd to {0}
-		vector<int> length(seq[i]->size(),0);
-		length[0]=1;  // length of subsequence ending with seq[i]->at(0) is 1
-
-		for (int j=1; j<seq[i]->size(); j++) {  // ignore 1st character
-			for (int k=0; k<j; k++) {  // subsequence ends w/ seq[i]->at(k)
-				if (seq[i]->at(k)<seq[i]->at(j) && length[k]>length[j])
-					length[j]=length[k];
+		for (int j=1; j<s->size(); j++) {  // ignore 1st character
+			for (int k=0; k<j; k++) {  // subsequence ends w/ s->at(k)
+				if (!pos[j]) pos[j] = new vector<int>;
+				if (s->at(k)<s->at(j))
+					pos[j]->assign(pos[k]->begin(),pos[k]->end());  // copy vector from s->at(k) to s->at(j)
 			}
-			length[j]++;  // adds seq[i]->at(j) to s	
+			if (!pos[j]) pos[j] = new vector<int>;
+			pos[j]->push_back(s->at(j));  // adds seq[i]->at(j) to s	
 		}
-		int lisLength = 0;
-		for (int j=0; j<seq[i]->size(); j++) {  // find max length
-			lisLength = max(lisLength, length[j]);
-		}
-		cout << "length of lis: " << lisLength << endl;
 
-		// sub.push_back(s);
+		vector<int> *lis = new vector<int>;
+		for (int j=0; j<pos.size(); j++) {  // find max length
+			if (lis->size() < pos[j]->size())
+				lis->assign(pos[j]->begin(),pos[j]->end());
+			if (lis->size() == pos[j]->size()) {
+				for (int i=0; i<lis->size(); i++)
+					if (lis->at(i) > pos[j]->at(i)) lis->assign(pos[j]->begin(),pos[j]->end());
+			}
+		}
+		
+		sub.push_back(lis);
+		clearVector(pos);
 	}
+
+	printSequences(sub);
 
 	// FREE UP ALL MEMORY
 	clearVector(seq);
+	clearVector(sub);
 		
 	return 0;
 }
