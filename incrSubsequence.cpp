@@ -11,10 +11,12 @@ void printSequences(vector<vector<int>*> s) {
 // POSTCONDITION: prints all the sequences that each vector pointer in s points to
 	// cout << "length of s: " << s.size() << endl;
 	for (int i=0; i<s.size(); i++) {
-		cout << s[i]->size() << " ";
-		if (s[i]) { for (int j=0; j<s[i]->size(); j++) cout << s[i]->at(j) << " "; }
-		else cout << "nullptr";
-		cout << endl;
+		cout << "lis[][" << i << "]: ";
+		if (!s[i]) cout << "nullptr";
+		else {
+			cout << s[i]->size() << " ";
+			for (int j=0; j<s[i]->size(); j++) cout << s[i]->at(j) << " ";
+		} cout << endl;
 	}
 }
 
@@ -42,34 +44,43 @@ int main() {
 	vector<vector<int>*> sub;  // holds all longest incr subsequences
 	for (int i=0; i<seq.size(); i++) {
 		vector<int> *s = seq[i];  // call s the vector* at i
-		vector<vector<int>*> pos(s->size());  // holds all possible incr subsequences of s
-		pos[0] = new vector<int>;
-		pos[0]->push_back(s->at(0));  // 1st incr subseq of s = s's 1st element
-
-		for (int j=1; j<s->size(); j++) {  // ignore 1st character
-			for (int k=0; k<j; k++) {  // subsequence ends w/ s->at(k)
-				if (!pos[j]) pos[j] = new vector<int>;
-				if (s->at(k)<s->at(j))
-					pos[j]->assign(pos[k]->begin(),pos[k]->end());  // copy vector from s->at(k) to s->at(j)
+		int n = s->size();  // n = # elements in sequence s
+	
+		// ADD EVERY POSSIBLE INCREASING SUBSEQUENCE TO NEW VECTOR IN POS
+		// lis[j] stores longest incr subsequence of subsequence s[0..j] (ends w/ s[j])
+		vector<vector<int>*> lis;
+		lis.push_back(new vector<int>);
+		lis[lis.size()-1]->push_back(s->at(0));  // 1st longest incr subsequence ending w/ s->at(j) w/ j=0
+		for (int j=1; j<n; j++) {  // start from 2nd element in s
+			lis.push_back(new vector<int>);
+			lis[j] = new vector<int>;
+			// find the lis that ends w/ s[j-1], where s[j-1] < current element s[j]
+			for (int k=0; k<j; k++) {  // do for each element in subseq s[0..j-1] (k=j-1)
+				// if the lis for s[0..j-1] is longer than lis for s[0..j] and s[j-1]<s[j] then copy that one
+				if (s->at(k) < s->at(j) && lis[k]->size() > lis[j]->size())
+					lis[j]->assign(lis[k]->begin(),lis[k]->end());
 			}
-			if (!pos[j]) pos[j] = new vector<int>;
-			pos[j]->push_back(s->at(j));  // adds seq[i]->at(j) to s	
+			lis[j]->push_back(s->at(j));
 		}
 
-		vector<int> *lis = new vector<int>;
-		for (int j=0; j<pos.size(); j++) {  // find max length
-			if (lis->size() < pos[j]->size())
-				lis->assign(pos[j]->begin(),pos[j]->end());
-			if (lis->size() == pos[j]->size()) {
-				for (int i=0; i<lis->size(); i++)
-					if (lis->at(i) > pos[j]->at(i)) lis->assign(pos[j]->begin(),pos[j]->end());
+		cout << "lis[" << i << "]\n";
+		printSequences(lis);
+
+		vector<int> *llis = new vector<int>;  // longest longest incr subsequence from lis
+		for (int j=0; j<lis.size(); j++) {  // find max length
+			if (llis->size() < lis[j]->size())
+				llis->assign(lis[j]->begin(),lis[j]->end());
+			if (llis->size() == lis[j]->size()) {  // gets the lexicographically-earliest sequence
+				for (int i=0; i<lis[j]->size(); i++)
+					if (llis->at(i) > lis[j]->at(i)) llis->assign(lis[j]->begin(),lis[j]->end());
 			}
 		}
 		
-		sub.push_back(lis);
-		clearVector(pos);
+		sub.push_back(llis);
+		clearVector(lis);
 	}
 
+	cout << "ans:\n";
 	printSequences(sub);
 
 	// FREE UP ALL MEMORY
