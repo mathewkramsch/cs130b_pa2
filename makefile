@@ -1,6 +1,15 @@
 # makefile
 
-all: incrSubsequence.cpp
-	g++ incrSubsequence.cpp -o incrSubsequence
+incrSubsequence: incrSubsequence.cpp
+	g++ $^ -o $@
+
+cuttingStrings: cuttingStrings.cpp
+	g++ $^ -o $@
+
+exactChange: exactChange.cpp
+	g++ $^ -o $@
+
+all: incrSubsequence cuttingStrings exactChange
+
 clean:
-	/bin/rm -f incrSubsequence
+	/bin/rm -f incrSubsequence exactChange cuttingStrings

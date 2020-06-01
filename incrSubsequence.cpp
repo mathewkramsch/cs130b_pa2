@@ -6,86 +6,59 @@
 #include <iterator>
 using namespace std;
 
-void printSequences(vector<vector<int>*> s) {
-// PRECONDITION: s is a vector of vector pointers
-// POSTCONDITION: prints all the sequences that each vector pointer in s points to
-	// cout << "length of s: " << s.size() << endl;
-	for (int i=0; i<s.size(); i++) {
-		cout << "lis[][" << i << "]: ";
-		if (!s[i]) cout << "nullptr";
-		else {
-			cout << s[i]->size() << " ";
-			for (int j=0; j<s[i]->size(); j++) cout << s[i]->at(j) << " ";
-		} cout << endl;
-	}
+void printVector(vector<int> v) {
+	for (int i=0;i<v.size();i++) cout << v[i] << ' ';
+	cout << endl;
 }
 
-void clearVector(vector<vector<int>*> v) {
-// PRECONDITION: v is a vector of vector pointers
-// POSTCONDITION: frees up all dynamically allocated memory in v
-	for (int i=0; i<v.size(); i++) delete v[i];
+void printSequence(vector<vector<int>> v) {
+	for (int i=0; i<v.size(); i++) {
+		cout << "[" << i << "]: ";
+		for (int j=0;j<v[i].size();j++) cout << v[i][j] << ' ';
+		cout << endl;
+	}
 }
-	
 
 int main() {
-	// INITIALIZE VECTOR OF SEQUENCES
-	int n(1), x, count(0);  // n=length of sequence, x=each val in sequence
-	vector<vector<int>*> seq;  // holds all sequences, vector of vector
-	while (n != 0) {
+	int n(1), x;  // n = length of sequence, x = each val in sequence
+	while (n!=0) {
+		// GET INPUT
 		cin >> n;
-		if (n!=0) seq.push_back(new vector<int>);
+		if (n==0) break;
+		vector<int> v;  // stores input sequence
 		for (int i=0; i<n; i++) {
 			cin >> x;
-			seq[count]->push_back(x);
+			v.push_back(x);
 		}
-		count++;
-	}
 
-	vector<vector<int>*> sub;  // holds all longest incr subsequences
-	for (int i=0; i<seq.size(); i++) {
-		vector<int> *s = seq[i];  // call s the vector* at i
-		int n = s->size();  // n = # elements in sequence s
-	
-		// ADD EVERY POSSIBLE INCREASING SUBSEQUENCE TO NEW VECTOR IN POS
-		// lis[j] stores longest incr subsequence of subsequence s[0..j] (ends w/ s[j])
-		vector<vector<int>*> lis;
-		lis.push_back(new vector<int>);
-		lis[lis.size()-1]->push_back(s->at(0));  // 1st longest incr subsequence ending w/ s->at(j) w/ j=0
-		for (int j=1; j<n; j++) {  // start from 2nd element in s
-			lis.push_back(new vector<int>);
-			lis[j] = new vector<int>;
-			// find the lis that ends w/ s[j-1], where s[j-1] < current element s[j]
-			for (int k=0; k<j; k++) {  // do for each element in subseq s[0..j-1] (k=j-1)
-				// if the lis for s[0..j-1] is longer than lis for s[0..j] and s[j-1]<s[j] then copy that one
-				if (s->at(k) < s->at(j) && lis[k]->size() > lis[j]->size())
-					lis[j]->assign(lis[k]->begin(),lis[k]->end());
+		// STORE LIS ENDING w/ v[i] FOR EACH SUBSEQUENCE v[0..i]
+		vector<vector<int>> lis(n);
+		lis[0].push_back(v[0]);
+		for (int i=1; i<n; i++) {  // store the lis up to v[i] in lis
+			for (int prev=0; prev<i; prev++) {
+				if (v[prev]<v[i]) {
+					if (lis[prev].size()>lis[i].size()) lis[i] = lis[prev];  // copy largest prev lis -> curr
+					if (lis[prev].size()==lis[i].size()) {  // find which one is lexicographically-earliest
+						for (int k=0;k<lis[i].size();k++)
+							if (lis[prev][k] < lis[i][k]) lis[i] = lis[prev];
+					}
+				}
 			}
-			lis[j]->push_back(s->at(j));
+			lis[i].push_back(v[i]);
 		}
 
-		cout << "lis[" << i << "]\n";
-		printSequences(lis);
-
-		vector<int> *llis = new vector<int>;  // longest longest incr subsequence from lis
-		for (int j=0; j<lis.size(); j++) {  // find max length
-			if (llis->size() < lis[j]->size())
-				llis->assign(lis[j]->begin(),lis[j]->end());
-			if (llis->size() == lis[j]->size()) {  // gets the lexicographically-earliest sequence
-				for (int i=0; i<lis[j]->size(); i++)
-					if (llis->at(i) > lis[j]->at(i)) llis->assign(lis[j]->begin(),lis[j]->end());
+		// GET LONGEST & LEXICOGRAPHICALLY-EARLIEST LIS IN LIS
+		vector<int> l;  // stores the longest lis ln lis
+		for (int i=0; i<n; i++) {
+			if (l.size()<lis[i].size()) l = lis[i];
+			if (l.size()==lis[i].size()) {
+				for (int k=0;k<lis[i].size();k++) { if (lis[i][k]<l[k]) l=lis[i]; }
 			}
 		}
+
+		cout << l.size() << ' ';
+		printVector(l);
 		
-		sub.push_back(llis);
-		clearVector(lis);
 	}
-
-	cout << "ans:\n";
-	printSequences(sub);
-
-	// FREE UP ALL MEMORY
-	clearVector(seq);
-	clearVector(sub);
-		
 	return 0;
 }
