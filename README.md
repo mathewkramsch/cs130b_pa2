@@ -1,3 +1,3 @@
-# Programming Assignment 2 for CS130b
+# CS 130B Programming Assignment #2
 
-* assignment consists of solving three problems outlined here: https://ucsb.kattis.com/courses/CS130B/s20/problemgroups/1496
+Assignment consisted of solving [Increasing Subsequence Problem](https://ucsb.kattis.com/problems/increasingsubsequence)/
